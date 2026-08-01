@@ -1,0 +1,59 @@
+{
+  "capAdd": [
+    "SYS_PTRACE"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "DavidAnson.vscode-markdownlint",
+        "EditorConfig.EditorConfig",
+        "Tyriar.sort-lines",
+        "bradzacher.vscode-copy-filename",
+        "esbenp.prettier-vscode",
+        "foxundermoon.shell-format",
+        "ms-azuretools.vscode-docker",
+        "streetsidesoftware.code-spell-checker",
+        "timonwong.shellcheck",
+        "usernamehw.errorlens"
+      ],
+      "settings": {
+        "editor.bracketPairColorization.enabled": true,
+        "editor.comments.insertSpace": true,
+        "editor.detectIndentation": false,
+        "editor.insertSpaces": true,
+        "editor.snippetSuggestions": "top",
+        "editor.tabCompletion": "on",
+        "editor.tabSize": 2,
+        "editor.trimAutoWhitespace": true,
+        "explorer.confirmDelete": false,
+        "extensions.ignoreRecommendations": true,
+        "files.associations": {
+          "*.code-snippets": "jsonc"
+        },
+        "files.autoSave": "afterDelay",
+        "files.eol": "auto",
+        "files.exclude": {
+          "**/.vscode": true
+        },
+        "remote.downloadExtensionsLocally": false,
+        "search.exclude": {
+          "**/*.code-search": true,
+          "**/*.git": true,
+          "**/*.vscode-server": true,
+          "**/bower_components": true,
+          "**/node_modules": true
+        },
+        "workbench.startupEditor": "none"
+      }
+    }
+  },
+  "image": "mcr.microsoft.com/devcontainers/base:debian",
+  "mounts": [
+    "source=${localWorkspaceFolder}/snippets,target=${containerWorkspaceFolder}/.vscode,type=bind,consistency=cached"
+  ],
+  "postCreateCommand": "chmod +x ${containerWorkspaceFolder}/.devcontainer/postCreateScript.sh && ${containerWorkspaceFolder}/.devcontainer/postCreateScript.sh",
+  "runArgs": [
+    "--rm",
+    "--name=vsc-${localEnv:USER}-${containerWorkspaceFolderBasename}-${devcontainerId}"
+  ]
+}
