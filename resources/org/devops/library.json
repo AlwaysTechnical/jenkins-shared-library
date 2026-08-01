@@ -1,0 +1,5 @@
+{
+  "name": "devops-shared-library",
+  "version": "1.0.0",
+  "description": "Generic reusable Jenkins Shared Library providing config management, build, test, checkout, deploy, notification, and Docker (build, push, login, tag, run, compose, clean, inspect, ECR/GCR login) steps."
+}
