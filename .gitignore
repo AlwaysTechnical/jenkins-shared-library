@@ -58,6 +58,7 @@ __pycache__/
 
 # Java
 *.class
+.gradle
 
 # Ruby
 .bundle
@@ -113,3 +114,12 @@ lib/
 dist/
 bower_components/
 *.min.js
+
+# Jenkins #
+############
+jenkins-cli.jar
+*.hpi
+*.jpi
+work/
+@tmp/
+*.groovy.xml

@@ -1,0 +1,114 @@
+// =============================================================================
+// Example Jenkinsfile consuming the shared library.
+//
+// Assumes the library is registered in Jenkins under the name "devops-shared".
+// Adjust the @Library name to match your Jenkins configuration.
+// =============================================================================
+
+@Library('devops-shared') _
+
+
+def config = [
+  buildTool         : 'maven',
+  gitCredentialsId  : 'git-cred',
+  slackChannel      : '#builds',
+  emailRecipients   : 'team@example.com',
+  retryAttempts     : 2,
+  retryDelaySeconds : 10,
+  dockerImage       : 'myapp',
+  dockerRegistry    : 'registry.example.com',
+  dockerRegistryCredentialsId : 'docker-cred',
+]
+
+pipeline {
+  agent any
+
+  options {
+    timeout(time: 30, unit: 'MINUTES')
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkoutCode(
+          url            : 'https://github.com/org/repo.git',
+          credentialsId  : config.gitCredentialsId,
+          branch         : 'main',
+          changelog      : true,
+        )
+      }
+    }
+
+    stage('Build') {
+      steps {
+        buildApp(
+          tool    : config.buildTool,
+          goals   : 'clean package',
+          extraArgs: ['-DskipTests'],
+        )
+      }
+    }
+
+    stage('Test') {
+      steps {
+        runTests(
+          tool : config.buildTool,
+          goals: 'test',
+        )
+      }
+    }
+
+    stage('Deploy (staging)') {
+      steps {
+        script {
+          waitForInput(
+            message       : 'Approve staging deployment?',
+            submitter     : 'dev-team',
+            timeoutMinutes: 120,
+          )
+          deploy(
+            command       : './scripts/deploy.sh staging',
+            version       : "1.0.${env.BUILD_NUMBER}",
+            url           : 'https://github.com/org/repo.git',
+            credentialsId : config.gitCredentialsId,
+            slackChannel  : config.slackChannel,
+            emailRecipients: config.emailRecipients,
+          )
+        }
+      }
+    }
+
+    stage('Docker Build & Push') {
+      steps {
+        script {
+          dockerBuild(
+            image             : "${config.dockerImage}",
+            tags              : ["${env.BUILD_NUMBER}", 'latest'],
+            registry          : config.dockerRegistry,
+            registryCredentialsId : config.dockerRegistryCredentialsId,
+            buildArgs         : [BUILD_NUMBER: env.BUILD_NUMBER],
+          )
+          dockerPush(
+            image             : "${config.dockerImage}",
+            tag               : env.BUILD_NUMBER,
+            registry          : config.dockerRegistry,
+            registryCredentialsId : config.dockerRegistryCredentialsId,
+          )
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      notify status: 'SUCCESS', message: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} succeeded"
+    }
+    failure {
+      notify status: 'FAILURE', message: "Build ${env.JOB_NAME} #${env.BUILD_NUMBER} failed"
+    }
+    cleanup {
+      echo 'Pipeline finished; cleaning up workspace'
+    }
+  }
+}
