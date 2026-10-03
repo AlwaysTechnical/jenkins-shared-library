@@ -47,10 +47,7 @@
       }
     }
   },
-  "image": "mcr.microsoft.com/devcontainers/base:debian",
-  "mounts": [
-    "source=${localWorkspaceFolder}/snippets,target=${containerWorkspaceFolder}/.vscode,type=bind,consistency=cached"
-  ],
+  "image": "mcr.microsoft.com/devcontainers/java:21",
   "postCreateCommand": "chmod +x ${containerWorkspaceFolder}/.devcontainer/postCreateScript.sh && ${containerWorkspaceFolder}/.devcontainer/postCreateScript.sh",
   "runArgs": [
     "--rm",
